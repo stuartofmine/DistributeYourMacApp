@@ -143,3 +143,100 @@ Developer ID 证书自创建之日起 5 年内有效；2017 年 2 月 22 日之�
 
 恭喜你🎉，你完成了签名这一工作的主要工作！
 
+## 公证
+### 什么叫公证
+从 macOS 10.14.5 开始，使用新的 Developer ID 证书签名的软件以及所有新的或更新的内核扩展都必须经过公证才能运行。从macOS 10.15开始，所有2019年6月1日之后构建并使用Developer ID分发的软件都必须经过公证。
+但是，通过Mac App Store分发的软件不需要进行公证，因为App Store提交流程已经包含相同等级的安全检查。
+
+MacOS的软件公证（Notarization），意味着由Developer ID 证书签名的软件上传到苹果服务器，由苹果官方进行检查是否存在恶意内容。
+
+公证不是应用程序审核，而是一个自动化系统，它检查代码签名是否正常，检查恶意内容是否存在，并返回一个结果。返回的速度和软件大小有关。对于10MB之内的app，通常在一分钟内返回结果。
+
+如果Developer ID签名密钥暴露或者发现有软件使用了你的Developer ID签名，可以撤销这些软件对应的票据，以免用户遭受损失。
+
+如果没有问题，公证服务会生成一张票据附在软件上，同时也会将这张票据上传到服务器。MacOS的Gatekeeper如果能找到软件对应的票据，那么就代表着该软件通过了公证服务。如果软件是从互联网上下载的，通过公证，并且是首次启动/安装，那么仅会提示用户是否要打开，如下：
+
+<img width="255" alt="图片 1" src="https://github.com/stuartofmine/DistributeYourMacApp/assets/25903841/7bf32bdd-574c-43af-b5c6-8ac69dd47cfc">
+
+否则，将会提示Apple无法检查该软件是否包含恶意软件，无法打开。
+
+<img width="256" alt="图片 2" src="https://github.com/stuartofmine/DistributeYourMacApp/assets/25903841/fca631ce-c0c5-462a-94b4-51a8ee7b4f76">
+
+### 公证的步骤
+1. 准备工作
+
+   注意，以下所有准备工作均在开发阶段完成。
+
+   1.1 系统版本要求
+
+   使用macOS10.9及更新版本。
+
+   1.2 启用代码签名
+
+   `codesign -vvv --deep --strict /path/to/binary/or/bundle`
+
+   使用以上代码检查代码签名是否正确。
+
+   1.3 使用Developer ID证书
+
+   只能公证使用 Developer ID 证书签名的 app，不可以使用分发证书或者自签名证书。
+
+   1.4 关闭`CODE_SIGN_INJECT_BASE_ENTITLEMENTS`
+
+   `CODE_SIGN_INJECT_BASE_ENTITLEMENTS`属性默认被设为YES，在调试时，这样就可以通过规避某些安全检查来对开启 系统完整性保护（SIP） 的系统进行调试。但这也意味着攻击者可以在运行时注入代码，因此当直接从Xcode（10.2或更新）中导出程序时，Xcode会自动删除此属性。
+
+   关闭方法：
+
+   将 Build Settings 中的CODE_SIGN_INJECT_BASE_ENTITLEMENTS设置为NO。
+
+   1.5 开启`Hardened Runtime capability`
+
+   Hardened Runtime capability即强化运行时功能，Hardened Runtime与系统完整性保护（SIP）一起，通过防止某些类别的漏洞来保护软件的运行时完整性，例如代码注入、动态链接库（DLL）劫持和进程内存空间篡改。
+   
+   它不会影响大多数应用程序的运行，但某些不太常见的功能，例如即时（JIT）编译，会被禁止。
+
+   在macOS 10.14及更高版本的Xcode 10及更高版本中可用。
+
+   开启方法：
+       Build Settings 中的`OTHER_CODE_SIGN_FLAGS`中添加`--options=runtime`
+ 
+   1.6 包含安全时间戳（需要联网）
+
+   默认情况下Xcode 在构建（Build）过程中不包含安全的时间戳，仅在导出（Achieve）期间添加安全时间戳。如果从命令行使用xcodebuild自定义导出流程，公证可能会失败。
+
+   开启方法：
+
+   Build Settings 中的`OTHER_CODE_SIGN_FLAGS` 中添加`--timestamp`
+
+2 创建公证专用密钥
+
+   首先从开发者账号中生成一个App 专用密码专门用于公证，得到的密钥应形如“ghih-xxxx-xxxx-xxxx”。该密码没有使用次数限制，好处在于不会在脚本中暴露真正的账号密码。创建步骤如下：
+
+   2.1  登录appleid.apple.com。
+
+   2.2  在“登录和安全性”部分中，选择 App 专用密码。
+
+<img width="454" alt="image" src="https://github.com/stuartofmine/DistributeYourMacApp/assets/25903841/0d9067a1-0962-4504-80b0-262c45e85cdb">
+
+   2.3 点击蓝色加号图标，然后按照屏幕上的步骤操作。 
+
+<img width="344" alt="image" src="https://github.com/stuartofmine/DistributeYourMacApp/assets/25903841/e7ec43fd-ea13-41fd-acb7-8b5b47f71344">
+
+<img width="350" alt="image" src="https://github.com/stuartofmine/DistributeYourMacApp/assets/25903841/e71704f8-725f-44a2-abfd-06d39f76595c">
+
+   会要求输入一次账号密码，接下来就会生成一个App专用密码。
+
+<img width="356" alt="image" src="https://github.com/stuartofmine/DistributeYourMacApp/assets/25903841/42328633-2470-4f28-a8a7-3e2395342fbb">
+
+   2.4  将 App 专用密码及开发者账号存储到本地。执行命令：
+
+   `xcrun notarytool store-credentials "sign-for-Mac" --apple-id "Test@email.com" --team-id "XXXXXXXXXX" --password " xxxx-xxxx-xxxx-xxxx"`
+
+   注意上面的`"Test@email.com"`和`--team-id "XXXXXXXXXX"`以及`--password " xxxx-xxxx-xxxx-xxxx"`需要分别替换成真正使用的开发者账号，团队id及生成的app专用密码。
+
+   现在，本地钥匙串中就有了一个名为 sign-for-Mac的项目。
+
+   通过这种方式，不必每次公证都输入密码，也不必在脚本中暴露密码明文。
+
+3. 执行公证
+
