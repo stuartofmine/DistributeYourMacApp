@@ -36,20 +36,24 @@ Developer ID 证书自创建之日起 5 年内有效；2017 年 2 月 22 日之�
 `https://developer.apple.com/account/resources/identifiers/list`
 1. 在“Certificates, Identifiers & Profiles (英文)”(证书、标识符和描述文件) 中，点按侧边栏中的“Identifiers”(证书)，再点按左上方Identifiersy右边的添加按钮 (+)。
    
-<img width="454" alt="image" src="https://github.com/stuartofmine/DistributeYourMacApp/assets/25903841/ab7d964b-dde6-4c51-8b0b-78f104a584a3">
+<img width="1027" alt="截屏2024-02-26 下午11 40 44" src="https://github.com/stuartofmine/DistributeYourMacApp/assets/25903841/32321cc3-26d9-4aa8-87af-3fc73f2a87b0">
+
 
 如图，选择第一个“App IDs”。 点击继续。
 
-<img width="454" alt="image" src="https://github.com/stuartofmine/DistributeYourMacApp/assets/25903841/c9ee2162-044b-42e6-91e0-36bc0a044f57">
+<img width="1309" alt="截屏2024-02-26 下午11 40 58" src="https://github.com/stuartofmine/DistributeYourMacApp/assets/25903841/5bf597f2-a2f6-4250-be06-26ee44cdb231">
+
 
 3. 如下图，填写描述与bundle ID。
 
-<img width="454" alt="image" src="https://github.com/stuartofmine/DistributeYourMacApp/assets/25903841/308ea4fe-c9ed-49da-af9d-44a52f7438f1">
+<img width="1306" alt="截屏2024-02-26 下午11 41 40" src="https://github.com/stuartofmine/DistributeYourMacApp/assets/25903841/deb06f90-1d97-4b6f-920d-008acf70d901">
+
 
 4. 在能力（Capabilities）中勾选你需要的权限，例如需要“访问WiFi信息(Access WiFi Information)”“网络扩展(Network Extensions)”“系统扩展(System Extension)”，就在这些选项前打勾。点击继续。
 5. 在部署详情里选择正在早期开发中。因为不需要使用内部分发配置文件,也不需要上架。
 
-![image](https://github.com/stuartofmine/DistributeYourMacApp/assets/25903841/ef269394-c97f-4328-9d9d-2eb63a2dbebe)
+<img width="454" alt="image" src="https://github.com/stuartofmine/DistributeYourMacApp/assets/25903841/8fd45e46-4614-40ec-9790-47f43d2f54aa">
+
 
 7. 继续，点击注册。即完成了操作。
 
@@ -68,17 +72,22 @@ Developer ID 证书自创建之日起 5 年内有效；2017 年 2 月 22 日之�
 <img width="456" alt="image" src="https://github.com/stuartofmine/DistributeYourMacApp/assets/25903841/4b8920a4-9ee3-4c48-a257-b6754657cc8c">
 
 4．按照说明创建证书签名请求。
-  1)   启动位于mac的“钥匙串访问”。
-  2)   选取“钥匙串访问”>“证书助理”>“从证书颁发机构请求证书”。
-  
-  <img width="454" alt="image" src="https://github.com/stuartofmine/DistributeYourMacApp/assets/25903841/e2eb79fa-e486-4147-8e1d-9c2f635855be">
-  
-  3)	在“证书助理”对话框中，在“用户电子邮件地址”栏位中输入电子邮件地址。
-  4)	在“常用名称”栏位中，输入密钥的名称。
-  5)	将“CA 电子邮件地址”栏位留空。
-  6)	选取“存储到磁盘”，然后点按“继续”。
+
+   1) 启动位于mac的“钥匙串访问”。
+
+   2) 选取“钥匙串访问”>“证书助理”>“从证书颁发机构请求证书”。
+
+
+  <img width="834" alt="截屏2024-02-26 下午11 44 22" src="https://github.com/stuartofmine/DistributeYourMacApp/assets/25903841/9fa1efac-b704-42c1-a9e4-b37fc67b946c">
+
+
+   3)	在“证书助理”对话框中，在“用户电子邮件地址”栏位中输入电子邮件地址。
+   4)	在“常用名称”栏位中，输入密钥的名称。
+   5)	将“CA 电子邮件地址”栏位留空。
+   6)	选取“存储到磁盘”，然后点按“继续”。
      
-  <img width="283" alt="image" src="https://github.com/stuartofmine/DistributeYourMacApp/assets/25903841/0871397b-08c9-4077-802c-705cd5e3f7a1">
+  <img width="608" alt="截屏2024-02-26 下午11 46 11" src="https://github.com/stuartofmine/DistributeYourMacApp/assets/25903841/66e7543b-658a-4282-ac32-d61a007b7c55">
+
   
 5. 点按“Choose File”(选取文件)。选择上一步创建并保存的证书签名请求。
  
