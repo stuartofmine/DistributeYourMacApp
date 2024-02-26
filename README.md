@@ -26,7 +26,7 @@
 
 Developer ID 证书自创建之日起 5 年内有效；2017 年 2 月 22 日之前生成的 Developer ID 预置描述文件会随 Developer ID 证书一起到期。
 
-对于pkg文件，官方文档：*如果用于签名的 Developer ID installer证书已过期，则必须使用有效的 Developer ID installer 证书重新签名，pkg才能正常安装。*实际上，经测试，只要签名该 pkg 文件的证书在签名时有效，那么即使在安装时该证书已过期，仍然可以被用户正常安装。但是我仍然建议你及时更新过期的证书及 .pkg ,放任过期证书泛滥并不是负责的做法。一旦苹果修改这个机制，你可能就需要通宵上线了。
+对于pkg文件，官方文档：*如果用于签名的 Developer ID installer证书已过期，则必须使用有效的 Developer ID installer 证书重新签名，pkg才能正常安装。*实际上，经测试，只要签名该 pkg 文件的证书在签名时有效，那么即使在安装时该证书已过期，仍然可以被用户正常安装。*但是我仍然建议你及时更新过期的证书及 .pkg ,放任过期证书泛滥并不是负责的做法。一旦苹果修改这个机制，你可能就需要通宵上线了。
 
 撤销删除 Developer ID App 证书 并不是随意操作的，不管你的苹果开发者账号的角色是什么，均需通过 product-security@apple.com 向 Apple 发送请求，才可以删除。
 对于所有 Developer ID App，如果用于签名的证书已被撤销，那么相应的 App 就无法再进行安装，已安装的 App 也会无法启动。
@@ -100,6 +100,46 @@ Developer ID 证书自创建之日起 5 年内有效；2017 年 2 月 22 日之�
 
 正常应显示如上。注意一个关键：**Developer ID 证书下应包含一个“专用密钥”**，没有这个专用密钥，是无法进行签名的。这个专用密钥其实在前述第四步生成证书签名请求时会保存，默认会保存到“钥匙串访问”中的“登录”类别中。而如果你的在第八步下载的证书文件没有保存到“钥匙串访问”中的“登录”类别，而是在“系统”类别，就会出现无法找到专用密钥的问题。
 
+### 获取provisioning profiles
+进入苹果开发者网页并登录。在 Profiles 中点击“+”。
 
+<img width="1302" alt="截屏2024-02-26 下午11 48 30" src="https://github.com/stuartofmine/DistributeYourMacApp/assets/25903841/1c4eff1e-8957-4f77-9eab-ea5fad1dd04b">
 
+选择`Distribution`最下方的`Developer ID`，点击 `Continue`
+
+<img width="1324" alt="截屏2024-02-26 下午11 49 55" src="https://github.com/stuartofmine/DistributeYourMacApp/assets/25903841/e2634f21-b2f9-4430-9920-3d2c3e221f95">
+
+选择对应的app id ,填入“获取Bundle ID” 中自定义的ID.
+
+<img width="1242" alt="image" src="https://github.com/stuartofmine/DistributeYourMacApp/assets/25903841/24c77d06-a26a-411e-9397-49198101366f">
+
+选择对应的证书。如果没有会让你重新生成一遍证书。
+
+<img width="1229" alt="image" src="https://github.com/stuartofmine/DistributeYourMacApp/assets/25903841/da980823-af6f-4784-b183-e4b1d958a34c">
+
+为Provisioning Profile命名。点击下载描述文件.
+
+在Xcode中导入Provisioning Profile 。注意，不要勾选Automatically manage signing。
+
+<img width="760" alt="截屏2024-02-26 下午11 59 14" src="https://github.com/stuartofmine/DistributeYourMacApp/assets/25903841/7fea9a87-b4f5-4f20-a5a2-11f9fda98d23">
+
+### 如果你需要和他人分享你的证书
+虽然不建议多人共同持有签名证书，尤其是在商业开发的模式下，会造成一定的风险。但是如果你需要导出并分享，那么请看：
+1. 导出P12文件。进入mac的 “钥匙串访问”，在“我的证书”中选择要导出的Developer ID Application 证书并点击导出。
+
+<img width="867" alt="截屏2024-02-27 上午12 03 29" src="https://github.com/stuartofmine/DistributeYourMacApp/assets/25903841/dcb376bb-8ed7-4765-ac50-3b65c80db0fb">
+
+2. 点击存储。
+
+<img width="450" alt="image" src="https://github.com/stuartofmine/DistributeYourMacApp/assets/25903841/5833c627-d632-4bad-ba72-735a1832ab0b">
+
+3. 接下来会要求分别输入p12文件的密钥和电脑的密码。依次输入即可。
+
+4. 完成之后，就可以在桌面找到这个p12文件并传输。接收者输入p12文件的密码即可安装对应的证书。
+
+5. 在Xcode 的target-Build Setting中，搜索Code Signing Identity，在Release中选择本地钥匙串中的证书（需要与生成Provisioning  Profile时选择的证书对应）。 
+
+<img width="911" alt="截屏2024-02-27 上午12 07 40" src="https://github.com/stuartofmine/DistributeYourMacApp/assets/25903841/44ab1da0-07ee-47e4-a9c2-8e1414f10760">
+
+恭喜你🎉，你完成了签名这一工作的主要工作！
 
