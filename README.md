@@ -1,10 +1,10 @@
 # Mac app和pkg签名公证盖章流程手册
-## 前言
+## 1. 前言
 在我不算很长的开发经历中，MacOS 平台上的软件分发是最让人头大的。作为一个门外汉，即使有着官方文档作为指引，也非常容易卡在某些稀奇古怪的地方（是的，我知道你耳熟能详的企业和机构中有人被卡了几周乃止几个月）。比未知的关卡更可怕的是落后的工具，我刚开始接手开发工作时，需要使用命令行将一个 App 编译成 .pkg 并执行某些脚本和操作，这种体验堪比上古时代的刀耕火种。
 
 为了打破这种不幸，我写下了这本操作手册。原本它只是我为某个机构的非技术人员撰写的培训手册，但是随着时间的推移，越来越多的同事和非同事向我索要这本手册。既然流传已经不可避免，使用的资料也可以公开查询到，索性公开以造福广大同行。其中必然有错漏的地方，欢迎指正。
 
-## 你需要预先知道的知识
+## 2. 你需要预先知道的知识
 在 MacOS 上，应用程序以 .app 的形式存放于用户电脑上。应用程序分发有两种。
 1. 可以通过官方的App Store下载，直接下载下来就是一个app。它需要遵循应用商店的审核规范和沙盒机制。
 2. 在你的网站上放一个链接，用户通过这个链接下载 .pkg 或者 .dmg 格式的文件，这个文件包含了 .app文件。下载完成之后，再双击这个文件，进行手动的安装。pkg文件的好处在于方便执行安装之后或者安装之前的脚本，比如安装之前卸载旧 App ,检测系统版本，安装完成之后自动打开 App ,乃至修改用户的某些系统设置，这些都可以，也无需遵守沙盒机制。因此，需要较高权限的软件通常采用第二种形式的pkg格式进行分发。本文也主要针对此种形式进行讲解。
@@ -16,9 +16,9 @@
 
 其中，如果是以 .pkg 中包含了 .app 的形式进行分发，那么对 .app 的操作可以省略。但是我仍然建议你不要省略这几步，因为**问题暴露的时间越早越好。**
 
-## 签名
+## 3. 签名
 
-### 什么叫签名
+### 3.1 什么叫签名
 
 代码/应用签名是一种 macOS 安全技术，用于证明应用程序的来源。一旦应用程序被签名，系统就可以检测到应用程序的任何更改。无论更改是意外引入的还是由恶意代码引入的，比如对应用程序进行任何修改都会使签名失效。
 
@@ -31,7 +31,7 @@ Developer ID 证书自创建之日起 5 年内有效；2017 年 2 月 22 日之�
 撤销删除 Developer ID App 证书 并不是随意操作的，不管你的苹果开发者账号的角色是什么，均需通过 product-security@apple.com 向 Apple 发送请求，才可以删除。
 对于所有 Developer ID App，如果用于签名的证书已被撤销，那么相应的 App 就无法再进行安装，已安装的 App 也会无法启动。
 
-### 获取Bundle ID
+### 3.2 获取Bundle ID
 打开下面这个网址并登陆：
 `https://developer.apple.com/account/resources/identifiers/list`
 1. 在“Certificates, Identifiers & Profiles (英文)”(证书、标识符和描述文件) 中，点按侧边栏中的“Identifiers”(证书)，再点按左上方Identifiersy右边的添加按钮 (+)。
@@ -57,7 +57,7 @@ Developer ID 证书自创建之日起 5 年内有效；2017 年 2 月 22 日之�
 
 7. 继续，点击注册。即完成了操作。
 
-### 获取Developer ID 证书
+### 3.3 获取Developer ID 证书
 如果已有证书，可以忽略这一步。
 注意，只有账户持有人才能创建Developer ID 证书。
 1. 打开下面这个网址并登陆。
@@ -100,7 +100,7 @@ Developer ID 证书自创建之日起 5 年内有效；2017 年 2 月 22 日之�
 
 正常应显示如上。注意一个关键：**Developer ID 证书下应包含一个“专用密钥”**，没有这个专用密钥，是无法进行签名的。这个专用密钥其实在前述第四步生成证书签名请求时会保存，默认会保存到“钥匙串访问”中的“登录”类别中。而如果你的在第八步下载的证书文件没有保存到“钥匙串访问”中的“登录”类别，而是在“系统”类别，就会出现无法找到专用密钥的问题。
 
-### 获取provisioning profiles
+### 3.4 获取provisioning profiles
 进入苹果开发者网页并登录。在 Profiles 中点击“+”。
 
 <img width="1302" alt="截屏2024-02-26 下午11 48 30" src="https://github.com/stuartofmine/DistributeYourMacApp/assets/25903841/1c4eff1e-8957-4f77-9eab-ea5fad1dd04b">
@@ -123,7 +123,7 @@ Developer ID 证书自创建之日起 5 年内有效；2017 年 2 月 22 日之�
 
 <img width="760" alt="截屏2024-02-26 下午11 59 14" src="https://github.com/stuartofmine/DistributeYourMacApp/assets/25903841/7fea9a87-b4f5-4f20-a5a2-11f9fda98d23">
 
-### 如果你需要和他人分享你的证书
+### 3.5 如果你需要和他人分享你的证书
 虽然不建议多人共同持有签名证书，尤其是在商业开发的模式下，会造成一定的风险。但是如果你需要导出并分享，那么请看：
 1. 导出P12文件。进入mac的 “钥匙串访问”，在“我的证书”中选择要导出的Developer ID Application 证书并点击导出。
 
@@ -143,8 +143,8 @@ Developer ID 证书自创建之日起 5 年内有效；2017 年 2 月 22 日之�
 
 恭喜你🎉，你完成了签名这一工作的主要工作！
 
-## 公证
-### 什么叫公证
+## 4. 公证
+### 4.1 什么叫公证
 从 macOS 10.14.5 开始，使用新的 Developer ID 证书签名的软件以及所有新的或更新的内核扩展都必须经过公证才能运行。从macOS 10.15开始，所有2019年6月1日之后构建并使用Developer ID分发的软件都必须经过公证。
 但是，通过Mac App Store分发的软件不需要进行公证，因为App Store提交流程已经包含相同等级的安全检查。
 
@@ -162,7 +162,7 @@ MacOS的软件公证（Notarization），意味着由Developer ID 证书签名�
 
 <img width="256" alt="图片 2" src="https://github.com/stuartofmine/DistributeYourMacApp/assets/25903841/fca631ce-c0c5-462a-94b4-51a8ee7b4f76">
 
-### 公证的步骤
+### 4.2 公证的步骤
 1. 准备工作
 
    注意，以下所有准备工作均在开发阶段完成。
@@ -208,7 +208,7 @@ MacOS的软件公证（Notarization），意味着由Developer ID 证书签名�
 
    Build Settings 中的`OTHER_CODE_SIGN_FLAGS` 中添加`--timestamp`
 
-2 创建公证专用密钥
+2. 创建公证专用密钥
 
    首先从开发者账号中生成一个App 专用密码专门用于公证，得到的密钥应形如“ghih-xxxx-xxxx-xxxx”。该密码没有使用次数限制，好处在于不会在脚本中暴露真正的账号密码。创建步骤如下：
 
@@ -238,11 +238,11 @@ MacOS的软件公证（Notarization），意味着由Developer ID 证书签名�
 
    通过这种方式，不必每次公证都输入密码，也不必在脚本中暴露密码明文。
 
-3. 执行公证
+### 4.3 执行公证
    
-   切换到要公证的程序所在目录下，将.app程序压缩成.zip格式，例如现在有程序压缩包名为 MacSip.zip。执行以下命令：
+   切换到要公证的程序所在目录下，将.app程序压缩成.zip格式，例如现在有程序压缩包名为 Mac.zip。执行以下命令：
    
-   `xcrun notarytool submit ./MacSip.zip 
+   `xcrun notarytool submit ./Mac.zip 
    --keychain-profile "sign-for-Mac" 
    --wait`
    
@@ -250,10 +250,10 @@ MacOS的软件公证（Notarization），意味着由Developer ID 证书签名�
    
    `--keychain-profile`: 指定本地钥匙串项目(本文公证准备步骤2.4已描述)。
    
-   `--wait`: 告诉notarytool只有在公证服务完成提交后才能退出。这无需对服务进行状态进行轮询。
+   `--wait`: 告诉`notarytool`只有在公证服务完成提交后才能退出。这无需对服务进行状态进行轮询。
    
    `--webhook`: 后跟URL。标志在完成处理提交后，访问特定站点。 一般不需要，这里不做演示。
-   公证时，仅需要替换./MacSip.zip为需要公证的目标，"sign-for-MacSip"替换为本地钥匙串中保存公证密钥的项目名。
+   公证时，仅需要替换./Mac.zip为需要公证的目标，"sign-for-Mac"替换为本地钥匙串中保存公证密钥的项目名。
    
    如果一切正常，那么返回结果应形如下图：
 <img width="911" alt="image" src="https://github.com/stuartofmine/DistributeYourMacApp/assets/25903841/8c179398-7a35-492e-bcf6-b23802714ea9">
@@ -262,11 +262,11 @@ MacOS的软件公证（Notarization），意味着由Developer ID 证书签名�
 
    如果返回的status不是Accepted，那么就需要排查原因了。
 
-   4. 公证失败原因及对应解决办法
+   ### 4.4 公证失败原因及对应解决办法
       
-      4.1 排除网络原因
+1. 排除网络原因
       
-         如果返回结果形如：
+   如果返回结果形如：
       
 `Conducting pre-submission checks for MacSip.zip and initiating connection to the Apple notary service...
 Submission ID received
@@ -275,7 +275,7 @@ Error: connectTimeout(NIO.TimeAmount(nanoseconds: 10000000000))`
 
    此错误并不是软件的问题，而是网络连接超时。优先选择能访问谷歌的网络环境，并且需要在终端中也开启网络代理。
    
-   4.2 查看失败原因
+2. 查看失败原因
       
    `xcrun notarytool log ee-xxxx-xxxxxxxxxxxx --keychain-profile "sign-for-Mac" ./developer_log.json`
    
@@ -285,26 +285,27 @@ Error: connectTimeout(NIO.TimeAmount(nanoseconds: 10000000000))`
       
    该文件格式如下：
 
-`
+```
 {
-    "archiveFilename": "xxxx.app",
-    "issues": [
-        {
-            "message": "The signature of the binary is invalid.",
-            "path": "/xxxxxx",
-            "severity": "error"
-        }
-    ],
-    "jobId": "xxxxxxxxxx",
-    "logFormatVersion": 1,
-    "status": "Invalid",
-    "statusSummary": "Archive contains critical validation errors",
-    "ticketContents": null,
-    "uploadDate": "2021-xxxxxxxxxx"
-}`
-主要关注的是`issues`中的`message`，它描述错误原因，如示例json中的原因就是签名无效。
+ "archiveFilename": "xxxx.app",
+ "issues": [
+     {
+         "message": "The signature of the binary is invalid.",
+         "path": "/xxxxxx",
+         "severity": "error"
+     }
+ ],
+ "jobId": "xxxxxxxxxx",
+ "logFormatVersion": 1,
+ "status": "Invalid",
+ "statusSummary": "Archive contains critical validation errors",
+ "ticketContents": null,
+ "uploadDate": "2021-xxxxxxxxxx"
+}
+```
+   主要关注的是`issues`中的`message`，它描述错误原因，如示例json中的原因就是签名无效。
 
-4.3 常见失败原因对照
+3. 常见失败原因对照
 
    `The signature of the binary is invalid.`: 签名无效。
       
