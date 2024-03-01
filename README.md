@@ -239,4 +239,86 @@ MacOS的软件公证（Notarization），意味着由Developer ID 证书签名�
    通过这种方式，不必每次公证都输入密码，也不必在脚本中暴露密码明文。
 
 3. 执行公证
+   
+   切换到要公证的程序所在目录下，将.app程序压缩成.zip格式，例如现在有程序压缩包名为 MacSip.zip。执行以下命令：
+   
+   `xcrun notarytool submit ./MacSip.zip 
+   --keychain-profile "sign-for-Mac" 
+   --wait`
+   
+   选项解析：
+   
+   `--keychain-profile`: 指定本地钥匙串项目(本文公证准备步骤2.4已描述)。
+   
+   `--wait`: 告诉notarytool只有在公证服务完成提交后才能退出。这无需对服务进行状态进行轮询。
+   
+   `--webhook`: 后跟URL。标志在完成处理提交后，访问特定站点。 一般不需要，这里不做演示。
+   公证时，仅需要替换./MacSip.zip为需要公证的目标，"sign-for-MacSip"替换为本地钥匙串中保存公证密钥的项目名。
+   
+   如果一切正常，那么返回结果应形如下图：
+<img width="911" alt="image" src="https://github.com/stuartofmine/DistributeYourMacApp/assets/25903841/8c179398-7a35-492e-bcf6-b23802714ea9">
+
+   id即为本次提交的文件公证时的id，每次提交的id都不相同。见到返回的`status`为 `Accepted`即代表公证通过。
+
+   如果返回的status不是Accepted，那么就需要排查原因了。
+
+   4. 公证失败原因及对应解决办法
+      
+      4.1 排除网络原因
+      
+         如果返回结果形如：
+      
+`Conducting pre-submission checks for MacSip.zip and initiating connection to the Apple notary service...
+Submission ID received
+  id: 144d66c4-3f84-4c88-xxxx-xxxxxxxxxxxx
+Error: connectTimeout(NIO.TimeAmount(nanoseconds: 10000000000))`
+
+   此错误并不是软件的问题，而是网络连接超时。优先选择能访问谷歌的网络环境，并且需要在终端中也开启网络代理。
+   
+   4.2 查看失败原因
+      
+   `xcrun notarytool log ee-xxxx-xxxxxxxxxxxx --keychain-profile "sign-for-Mac" ./developer_log.json`
+   
+   使用时`ee6f0b87-727a-4514-xxxx-xxxxxxxxxxxx`替换为本次提交所得到的id，"sign-for-Mac"替换为公证时的钥匙项名称。
+   
+   上述命令会查询指定id对应的公证日志，写入到当前目录下的`developer_log.json`文件中。
+      
+   该文件格式如下：
+
+`
+{
+    "archiveFilename": "xxxx.app",
+    "issues": [
+        {
+            "message": "The signature of the binary is invalid.",
+            "path": "/xxxxxx",
+            "severity": "error"
+        }
+    ],
+    "jobId": "xxxxxxxxxx",
+    "logFormatVersion": 1,
+    "status": "Invalid",
+    "statusSummary": "Archive contains critical validation errors",
+    "ticketContents": null,
+    "uploadDate": "2021-xxxxxxxxxx"
+}`
+主要关注的是`issues`中的`message`，它描述错误原因，如示例json中的原因就是签名无效。
+
+4.3 常见失败原因对照
+
+   `The signature of the binary is invalid.`: 签名无效。
+      
+   `The binary is not signed with a valid Developer ID certificate.`: Developer ID证书无效。
+   
+   `The signature does not include a secure timestamp.`： 未包含安全时间戳。`OTHER_CODE_SIGN_FLAGS` 中需要添加`--timestamp`
+      
+   `The executable requests the com.apple.security.get-task-allow entitlement.`: `CODE_SIGN_INJECT_BASE_ENTITLEMENTS`没有设置为NO。
+    
+   `The binary uses an SDK older than the 10.9 SDK.`: macOS系统版本太老，需要高于10.9
+      
+   `The executable does not have the hardened runtime enabled.`: `OTHER_CODE_SIGN_FLAGS`中没有添加`--options=runtime`
+
+
+
+
 
